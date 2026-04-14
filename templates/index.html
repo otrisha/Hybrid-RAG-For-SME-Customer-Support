@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benamdaj Technical Support</title>
+    <link rel="stylesheet" href="/static/styles/chat.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-name">Benamdaj Dredging Solutions Ltd.</span>
+                <span class="brand-sub">AI-Powered Technical Support &mdash; BDS-RAG-001</span>
+            </div>
+            <div class="mode-selector">
+                <label for="mode-select">Retrieval mode:</label>
+                <select id="mode-select">
+                    <option value="hybrid"        {% if mode == 'hybrid'        %}selected{% endif %}>Hybrid (BM25 + Dense)</option>
+                    <option value="bm25_only"     {% if mode == 'bm25_only'     %}selected{% endif %}>BM25 Only</option>
+                    <option value="dense_only"    {% if mode == 'dense_only'    %}selected{% endif %}>Dense Only</option>
+                    <option value="hybrid_no_faq" {% if mode == 'hybrid_no_faq' %}selected{% endif %}>Hybrid (No FAQ)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="chat-wrapper">
+        <div class="chat-card">
+            <div class="chat-header">
+                <div class="status-dot"></div>
+                Technical Support Assistant
+            </div>
+
+            <div id="messages" class="messages" aria-live="polite" aria-label="Chat messages">
+                <div class="message bot-message intro">
+                    <div class="message-content">
+                        Hello! I am the Benamdaj technical support assistant. I can help you with
+                        equipment specifications, operating procedures, troubleshooting, and maintenance
+                        for our dredger fleet. How can I assist you today?
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Ask about your dredger equipment..."
+                    aria-label="Your question"
+                    autocomplete="off"
+                >
+                <button id="send-btn" aria-label="Send">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        MSc AI &amp; Data Science &mdash; University of Wolverhampton &mdash; Patricia Orji
+    </footer>
+
+    <script>
+        // Pass Jinja mode value to JS
+        const DEFAULT_MODE = "{{ mode }}";
+    </script>
+    <script src="/static/scripts/chat.js"></script>
+</body>
+</html>

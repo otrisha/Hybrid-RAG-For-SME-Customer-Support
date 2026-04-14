@@ -1,0 +1,49 @@
+query_id,query,expected_model,topic_category,relevant_doc,answer,sources_cited,is_fallback,has_citations,retrieved_doc_ids,hit_at_1,hit_at_5,rr_score,latency_seconds,retrieval_mode,ragas_faithfulness,ragas_answer_rel,ragas_ctx_precision,ragas_ctx_recall
+FAQ-01,What should I check first every morning before starting?,All,daily_operations,BDS-FAQ-001,"Before starting the vessel, the first thing you should check is the oil level. It is crucial to ensure that the oil is at an adequate level because starting the engine with low oil can lead to bearing damage within minutes. After checking the oil, you should check the fuel level, followed by the gearbox oil on models that have one. Additionally, inspect the battery voltage, hose connections for any overnight loosening, confirm that the emergency stop is functional, and check that the fire extinguisher is in position. This sequence is non-negotiable for daily operations [BDS-FAQ-001].",BDS-FAQ-001,False,True,"BDS-FAQ-001, BDS-OM-001, BDS-TSG-001, BDS-OM-001, BDS-TSG-001",True,True,1.0,8.46867310000016,hybrid,,,,
+FAQ-02,Why does production drop in the afternoon?,All,performance,BDS-FAQ-001,"Production tends to drop in the afternoon for a few reasons: 
+
+1. The easy, surface material is often exhausted by that time, leading operators to work deeper or in harder material that was left untouched for a reason.
+2. The engine and hydraulics run hotter in the afternoon heat, which requires more conservative RPM management.
+3. Operator attention may drift as fatigue sets in, resulting in delays in anchor repositioning and suction head adjustments. These small delays can compound and lead to lower production figures.
+
+Typically, the best output is achieved during the first two hours of the shift in the morning [BDS-FAQ-001].",BDS-FAQ-001,False,True,"BDS-FAQ-001, BDS-FAQ-001, BDS-FAQ-001, BDS-FAQ-001, BDS-FAQ-001",True,True,1.0,4.24526220000007,hybrid,,,,
+OM-01,What is the engine startup sequence?,All,daily_operations,BDS-OM-001,"The engine startup sequence for all dredger models is as follows:
+
+1. Check engine oil level on the gauge/dipstick -- confirm it is within the acceptable range before cranking.
+2. Check gearbox oil level and condition (Models 1, 2, 3). For Model 4 (PTO), confirm PTO is disengaged.
+3. Check fuel level. Confirm sufficient fuel for the planned shift duration.
+4. Check battery terminals are clean and securely connected. Confirm battery charge is adequate.
+5. Set throttle to idle position before engaging the ignition.
+6. Turn ignition key to START. Hold until engine fires. Release immediately when engine starts.
+7. Allow engine to run at idle for a minimum of 5 minutes before applying any load. This allows oil to circulate and engine temperature to stabilize.
+8. Monitor oil pressure gauge and coolant temperature during warm-up. Confirm both are within normal range before proceeding.
+9. Engage auxiliary engine (CAT 3412) if electrical load is required -- confirm generator output voltage is 240 V before connecting loads.
+10. Confirm no unusual noises, smoke, or warning lights before proceeding to pump engagement.
+
+This sequence must be followed in order every time the engine is started. Do not skip steps or vary the sequence [BDS-OM-001].",BDS-OM-001,False,True,"BDS-OM-001, BDS-FAQ-001, BDS-OM-001, BDS-FAQ-001, BDS-TSG-001",True,True,1.0,15.652410799999416,hybrid,,,,
+OM-02,What must be done before starting every morning?,All,daily_operations,BDS-OM-001,"Before starting every morning, the following checks must be completed:
+
+1. Check engine oil level using the dipstick. The level must be between the MIN and MAX marks. Top up with Total Ruby X if below MIN.
+2. Check fuel level in the diesel tank. Plan refueling before the shift if the level is below half. Refuel only with the engine stopped.
+3. Inspect all hose connections, pipe joints, and suction line fittings for signs of leakage. Tighten or replace as needed before starting.
+4. Inspect the jet suction head (for Models 1 and 2) or cutter/suction assembly (for Models 3 and 4) for debris blockage. Clear any obstruction before lowering to dredging depth.
+5. Check that all safety guards and protective covers are in place and secured.
+6. Confirm anchor lines and mooring ropes are correctly secured to hold the vessel in position.
+7. Test the emergency stop button to confirm it operates correctly. Reset after the test.
+8. Confirm a serviceable fire extinguisher is present at the designated location on deck.
+9. Confirm all crew members are wearing correct PPE: life jackets, hard hats, safety boots, and high-visibility vests.
+10. Check weather and wind conditions. Do not commence dredging if conditions exceed safe operating limits.
+11. Check gearbox oil level (for Models 1, 2, and 3) or PTO condition (for Model 4) every morning before startup.
+12. Inspect anchor wires and winch lines for signs of kinking, fraying, or wear. Replace before use if damaged.
+
+These steps are crucial to ensure safe operation and should be followed diligently [BDS-OM-001].",BDS-OM-001,False,True,"BDS-FAQ-001, BDS-OM-001, BDS-FAQ-001, BDS-OM-001, BDS-OM-001",False,True,0.5,15.974040500000228,hybrid,,,,
+PL-01,What is the purchase price of the 16/14 inch cutter suction dredger?,Model 1,customer_interactions,BDS-PL-001,"The purchase price of the 16/14 Inch Cutter Suction Dredger (BDS-CSD-1614) is 200,000,000 Nigerian Naira [BDS-PL-001].",,False,False,"BDS-PL-001, BDS-SPEC-001, BDS-FAQ-001, BDS-SPEC-001, BDS-SPEC-001",True,True,1.0,4.516108999999233,hybrid,,,,
+PL-02,How much does the 14/12 amphibious dredger cost?,Model 2,customer_interactions,BDS-PL-001,I do not have that information in the current documentation. Please contact Benamdaj Dredging Solutions Ltd. directly.,,True,False,"BDS-SPEC-001, BDS-OM-001, BDS-TSG-001, BDS-TSG-001, BDS-SPEC-001",False,False,0.0,3.9365085999997973,hybrid,,,,
+SPEC-M1-01,What is the engine fitted to the 16/14 inch cutter suction dredger?,Model 1,equipment_knowledge,BDS-SPEC-001,"The 16/14 Inch Cutter Suction Dredger (BDS-CSD-1614) is fitted with a Weichai X6170ZC650-2 marine diesel engine, which has a power output of 478 kW (650 HP) [BDS-SPEC-001].",BDS-SPEC-001,False,True,"BDS-PL-001, BDS-SPEC-001, BDS-FAQ-001, BDS-SPEC-001, BDS-SPEC-001",False,True,0.5,5.6291924000006475,hybrid,,,,
+SPEC-M1-02,What is the maximum dredging depth of the 16/14 dredger?,Model 1,equipment_knowledge,BDS-SPEC-001,The maximum dredging depth of the 16/14 Inch Cutter Suction Dredger (BDS-CSD-1614) is 22 meters [BDS-FAQ-001].,BDS-FAQ-001,False,True,"BDS-FAQ-001, BDS-OM-001, BDS-SPEC-001, BDS-FAQ-001, BDS-FAQ-001",False,True,0.3333333333333333,4.369206100000156,hybrid,,,,
+TSG-01,The pump has lost suction — what should I check?,All,fault_diagnosis,BDS-TSG-001,"First, check that the suction head is still submerged and in contact with the dredge face, as it can easily drift off position without notice. Then, inspect for air ingress at the pipe joints; any loose connection may allow air to enter and break the suction. If neither of those is the cause, check the impeller, especially if the vessel has operated for more than 200 hours since the last service, as wear on the impeller can lead to a loss of efficiency and inability to maintain suction in denser material [BDS-FAQ-001]. 
+
+For further troubleshooting, refer to the Operations and Maintenance Manual (BDS-OM-001) and consult qualified engineers for safety and emergency situations.",BDS-FAQ-001,False,True,"BDS-TSG-001, BDS-TSG-001, BDS-TSG-001, BDS-FAQ-001, BDS-TSG-001",True,True,1.0,9.247129500000483,hybrid,,,,
+TSG-02,The engine produces black smoke — what is the cause?,All,fault_diagnosis,BDS-TSG-001,"The production of black smoke from the engine is most commonly caused by a clogged air filter, which leads to insufficient combustion air and a rich fuel mixture. Other potential causes include engine overload, injector faults, or high ambient temperatures. 
+
+To address this issue, you should first check and replace the air filter. If the smoke persists after this, further investigation into the engine load and injectors may be necessary [BDS-FAQ-001], [BDS-TSG-001].","BDS-FAQ-001, BDS-TSG-001",False,True,"BDS-FAQ-001, BDS-TSG-001, BDS-FAQ-001, BDS-TSG-001, BDS-TSG-001",False,True,0.5,7.363365299999714,hybrid,,,,
