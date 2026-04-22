@@ -9,159 +9,236 @@
 
 ## Overview
 
-This codebase implements a Hybrid Retrieval-Augmented Generation (RAG) system for Benamdaj Dredging Solutions Ltd. (RC: 1653951), a marine engineering SME based in Nigeria. The system replaces a human-staffed live chat — which is unavailable outside agent working hours, inconsistent across agents, and unable to handle concurrent queries — with an AI-powered assistant grounded in the company's own technical documentation.
+This codebase implements a Hybrid Retrieval-Augmented Generation (RAG) system for **Benamdaj Dredging Solutions Ltd.** (RC: 1653951), a marine engineering SME based in Nigeria. The system replaces a human-staffed live chat — unavailable outside working hours, inconsistent across agents, and unable to handle concurrent queries — with an AI-powered assistant grounded in the company's own technical documentation.
 
-The system retrieves relevant content from a four-document knowledge base using a combination of BM25 sparse retrieval and dense semantic retrieval, fuses results via Reciprocal Rank Fusion (RRF), and generates grounded, cited responses using the OpenAI API.
+The system retrieves relevant content from a five-document knowledge base using a combination of **BM25 sparse retrieval** and **dense semantic retrieval** (Pinecone), fuses results via **Reciprocal Rank Fusion (RRF)**, and generates grounded, cited responses using the **OpenAI API**. It is deployed as a **Streamlit** web application on Streamlit Community Cloud.
+
+---
+
+## Live Demo
+
+> Deployed on Streamlit Community Cloud  
+> Main file: `streamlit_app.py`
 
 ---
 
 ## Project Structure
 
 ```
-benamdaj_rag/
+Thesis/
+├── .streamlit/
+│   ├── config.toml               Streamlit theme (navy/blue)
+│   └── secrets.toml.example      Template — copy and fill for local Streamlit dev
+│
 ├── config/
-│   ├── settings.py           All constants, API keys, paths, evaluation targets
-│   ├── prompts.py            System prompt templates
-│   └── .env.example          Environment variable template
+│   ├── settings.py               All constants, API keys, paths, evaluation targets
+│   └── .env                      Local environment variables (not committed)
+│
+├── data/
+│   ├── documents/                Five source PDFs (committed to repo)
+│   ├── chunks/                   Chunked JSON output from ingestion
+│   └── bm25_index.pkl            Pre-built BM25 index (committed — avoids cold-start re-ingestion)
 │
 ├── ingestion/
-│   ├── document_loader.py    Parses .docx files; preserves heading structure
-│   ├── chunker.py            Four domain-adaptive chunking strategies
-│   └── indexer.py            BM25Index, EmbeddingModel, Pinecone upsert
+│   ├── document_loader.py        PDF parsing via pdfplumber; font-size heading inference
+│   ├── chunker.py                Four domain-adaptive chunking strategies
+│   └── indexer.py                BM25Index, EmbeddingModel, Pinecone upsert
 │
 ├── retrieval/
-│   ├── query_processor.py    Query cleaning, model detection, topic classification
-│   └── hybrid_retriever.py   BM25 + dense + RRF fusion; ablation support
+│   ├── query_processor.py        Query cleaning, model detection, topic classification, greeting handling
+│   └── hybrid_retriever.py       BM25 + dense + RRF fusion; four ablation modes
 │
 ├── generation/
-│   ├── prompt_builder.py     System prompt construction with context formatting
-│   └── generator.py          OpenAI API call, citation verification, fallback detection
+│   ├── prompt_builder.py         System prompt construction with context formatting
+│   └── generator.py              OpenAI API call, citation verification, fallback detection
 │
 ├── evaluation/
-│   ├── eval_queries.py       100-query evaluation set with ground truths
-│   └── ragas_evaluator.py    Recall@5, Precision@5, MRR + RAGAS metrics; ablation runner
+│   ├── eval_queries.py           93-query evaluation set with ground truths (5 documents)
+│   └── ragas_evaluator.py        Recall@5, Precision@5, MRR + RAGAS metrics; ablation runner
 │
 ├── utils/
-│   ├── helpers.py            Text cleaning, tokenisation, chunk ID generation
-│   └── logger.py             Coloured structured logging
+│   ├── helpers.py                Text cleaning, tokenisation, chunk ID generation
+│   └── logger.py                 Structured logging
 │
-├── tests/
-│   └── test_pipeline.py      32 unit tests (no API keys required)
+├── docs/
+│   ├── generate_chapter4.py      Generates Chapter 4 (Methodology) .docx
+│   └── generate_chapter5.py      Generates Chapter 5 (Results) .docx
 │
-├── ingest.py                 Knowledge base construction entry point
-├── main.py                   CLI + FastAPI API server
-└── requirements.txt
+├── streamlit_app.py              Streamlit web application (deployment entry point)
+├── main.py                       Flask web app + CLI (local development)
+├── ingest.py                     Knowledge base construction entry point
+├── requirements.txt              Deployment requirements (Streamlit Cloud)
+└── requirements_eval.txt         Evaluation requirements (local only)
 ```
 
 ---
 
-## Quick Start
+## Knowledge Base
 
-### 1. Install dependencies
+| Document ID | File | Knowledge Type | Chunking Strategy | Chunks |
+|---|---|---|---|---|
+| BDS-SPEC-001 | `Benamdaj_Product_Specification_Manual.pdf` | Explicit — structured | Section-based | ~21 |
+| BDS-OM-001 | `Benamdaj_OM_Manual.pdf` | Explicit — procedural | Procedure-based | ~19 |
+| BDS-TSG-001 | `Benamdaj_Troubleshooting_Guide.pdf` | Explicit — diagnostic | Fault-block-based | ~14 |
+| BDS-FAQ-001 | `BDS-FAQ-001_Staff_Interview_FAQs.pdf` | Tacit — elicited | Q&A-pair-based | 56 |
+| BDS-PL-001 | `Benamdaj_price_list.pdf` | Explicit — structured | Section-based | ~19 |
+| **Total** | | | | **109 chunks** |
+
+---
+
+## Quick Start — Local Development
+
+### 1. Clone and install
+
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/otrisha/Hybrid-RAG-For-SME-Customer-Support.git
+cd Hybrid-RAG-For-SME-Customer-Support
+
+python -m venv venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS / Linux
+
+pip install -r requirements_eval.txt   # includes all deployment + evaluation deps
 ```
 
 ### 2. Configure environment
+
+Create `config/.env`:
+
+```
+OPENAI_API_KEY=sk-...
+PINECONE_API_KEY=...
+PINECONE_INDEX_NAME=benamdaj-rag
+PINECONE_CLOUD=aws
+PINECONE_REGION=us-east-1
+OPENAI_MODEL=gpt-4o-mini
+```
+
+### 3. Run the Streamlit app (recommended)
+
 ```bash
-cp config/.env.example .env
-# Edit .env and add your OPENAI_API_KEY and PINECONE_API_KEY
+streamlit run streamlit_app.py
 ```
 
-### 3. Place documents in the data directory
-```
-data/documents/
-├── BDS-SPEC-001_Product_Specification_Manual.docx
-├── BDS-OM-001_Operations_Maintenance_Manual.docx
-├── BDS-TSG-001_Troubleshooting_Guide.docx
-└── BDS-FAQ-001_Staff_Interview_FAQs.docx
+The knowledge base is loaded automatically on first run. If `data/bm25_index.pkl` is present (it is, committed to the repo) and Pinecone is already populated, the app starts in seconds.
+
+### 4. Or run the Flask app (alternative local server)
+
+```bash
+python main.py                 # Flask on http://localhost:5000
+python main.py --cli           # Interactive CLI mode
+python main.py --mode bm25_only
 ```
 
-### 4. Ingest the knowledge base
+### 5. Re-ingest from scratch (if needed)
+
 ```bash
 python ingest.py
-# Chunks all documents, builds BM25 index, uploads to Pinecone
 ```
 
-### 5. Run the interactive CLI
-```bash
-python main.py
-# Starts interactive customer support chat session
-```
-
-### 6. Or run the FastAPI server
-```bash
-uvicorn main:app --reload
-# API available at http://localhost:8000
-# Interactive docs at http://localhost:8000/docs
-```
+This re-chunks all PDFs, rebuilds the BM25 index, and re-uploads vectors to Pinecone.
 
 ---
 
-## Ablation Configurations
+## Streamlit Cloud Deployment
 
-The system supports four retrieval modes for the ablation study (Thesis Table 8):
+1. Push this repository to GitHub (including `data/bm25_index.pkl` and all PDFs)
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**
+3. Select the repository and set **Main file path** to `streamlit_app.py`
+4. Under **Settings → Secrets**, paste the contents of `.streamlit/secrets.toml.example` filled with real values
+5. Deploy — first cold start takes ~60 seconds to download the sentence-transformers model; subsequent starts are fast
 
-| Mode | Description | Run command |
-|------|-------------|-------------|
-| `hybrid` | BM25 + Dense + RRF (proposed system, default) | `python main.py` |
-| `bm25_only` | Sparse retrieval only (Config A baseline) | `python main.py --mode bm25_only` |
-| `dense_only` | Dense retrieval only (Config B baseline) | `python main.py --mode dense_only` |
-| `hybrid_no_faq` | Hybrid without BDS-FAQ-001 (Config D) | `python main.py --mode hybrid_no_faq` |
+---
+
+## Retrieval Modes (Ablation Study)
+
+| Mode | Description | Streamlit selector |
+|---|---|---|
+| `hybrid` | BM25 + Dense + RRF — full proposed system (default) | ✓ |
+| `bm25_only` | Sparse keyword retrieval only (Config A baseline) | ✓ |
+| `dense_only` | Dense semantic retrieval only (Config B baseline) | ✓ |
+| `hybrid_no_faq` | Hybrid without BDS-FAQ-001 tacit knowledge (Config D) | ✓ |
+
+Switch modes via the sidebar dropdown in the Streamlit app, or via `--mode` flag in the Flask/CLI app.
 
 ---
 
 ## Running the Evaluation
 
+Install evaluation dependencies first:
+
 ```bash
-# Full evaluation with RAGAS (requires OpenAI key)
+pip install -r requirements_eval.txt
+```
+
+```bash
+# Balanced 20-query run with RAGAS (4 queries per document, ~$0.10)
+python -m evaluation.ragas_evaluator --mode hybrid --per-doc 4
+
+# Full 93-query run with RAGAS
 python -m evaluation.ragas_evaluator --mode hybrid
 
-# Ablation — all four configurations
-for mode in bm25_only dense_only hybrid hybrid_no_faq; do
-    python -m evaluation.ragas_evaluator --mode $mode
-done
-
-# Quick retrieval-only evaluation (no RAGAS, no API key needed)
+# Retrieval metrics only — no RAGAS, no API cost
 python -m evaluation.ragas_evaluator --mode hybrid --no-ragas
+
+# Ablation study — all four configurations
+for mode in bm25_only dense_only hybrid hybrid_no_faq; do
+    python -m evaluation.ragas_evaluator --mode $mode --per-doc 4
+done
 ```
 
-Results are saved as CSV files in `logs/evaluation/`.
+Results are saved as CSV files in `logs/evaluation/eval_<mode>_<timestamp>.csv`.
 
 ---
 
-## Running Unit Tests
+## Evaluation Results (Hybrid — Configuration C)
 
-```bash
-# Run all 32 tests (no API keys required)
-python -m pytest tests/test_pipeline.py -v
-```
+Evaluation run: 20 queries, balanced across 5 documents.
+
+| Metric | Result | Target | Status |
+|---|---|---|---|
+| Recall@5 | 0.800 | ≥ 0.80 | PASS |
+| Precision@5 | 0.390 | ≥ 0.40 | FAIL |
+| MRR | 0.685 | ≥ 0.70 | FAIL |
+| Fallback rate | 0.000 | — | — |
+| Citation rate | 1.000 | — | — |
+| Mean latency | 3.47 s | ≤ 8.0 s | PASS |
+| RAGAS Faithfulness | pending | ≥ 0.80 | — |
+| RAGAS Answer Relevancy | pending | ≥ 0.75 | — |
+| RAGAS Context Precision | pending | ≥ 0.65 | — |
+| RAGAS Context Recall | pending | ≥ 0.75 | — |
+
+> Precision@5 and MRR failures are discussed in Chapter 5. With a 5-document corpus, cross-document retrieval is expected; Precision@5 = 0.39 is 1.95× the random baseline of 0.20.
 
 ---
 
-## Knowledge Base Documents
+## Evaluation Targets
 
-| Document ID | Title | Knowledge Type | Chunking |
-|-------------|-------|---------------|----------|
-| BDS-SPEC-001 | Product Specification Manual | Explicit — structured | Section-based (~50 chunks) |
-| BDS-OM-001 | Operations & Maintenance Manual | Explicit — procedural | Procedure-based (~40 chunks) |
-| BDS-TSG-001 | Troubleshooting Guide | Explicit — diagnostic | Fault-block-based (~30 chunks) |
-| BDS-FAQ-001 | Staff Interview FAQs | Tacit — elicited | Q&A-pair-based (56 chunks) |
+| Metric | Target | Rationale |
+|---|---|---|
+| Recall@5 | ≥ 0.80 | Primary retrieval success criterion |
+| Precision@5 | ≥ 0.40 | Adjusted for 5-doc corpus (2× random baseline) |
+| MRR | ≥ 0.70 | First-rank relevance |
+| RAGAS Faithfulness | ≥ 0.80 | Hallucination guard |
+| RAGAS Answer Relevancy | ≥ 0.75 | Response usefulness |
+| RAGAS Context Precision | ≥ 0.65 | Retrieval precision proxy |
+| RAGAS Context Recall | ≥ 0.75 | Retrieval coverage |
+| Max Latency | ≤ 8.0 s | Practical usability |
 
 ---
 
-## Evaluation Targets (Thesis Tables 6 & 7)
+## Technology Stack
 
-| Metric | Target |
-|--------|--------|
-| Recall@5 | ≥ 0.80 |
-| Precision@5 | ≥ 0.60 |
-| MRR | ≥ 0.70 |
-| RAGAS Faithfulness | ≥ 0.80 |
-| RAGAS Answer Relevancy | ≥ 0.75 |
-| RAGAS Context Precision | ≥ 0.65 |
-| RAGAS Context Recall | ≥ 0.75 |
-| Max Latency | ≤ 8.0s |
+| Component | Technology |
+|---|---|
+| Embedding model | `sentence-transformers/all-MiniLM-L6-v2` (384-dim) |
+| Vector database | Pinecone Serverless (AWS us-east-1, cosine similarity) |
+| Sparse retrieval | BM25Okapi — `rank-bm25==0.2.2` (k₁=1.5, b=0.75) |
+| Fusion | Reciprocal Rank Fusion (RRF, k=60) |
+| Generator | OpenAI `gpt-4o-mini` |
+| PDF parsing | `pdfplumber` with font-size heading inference |
+| Web UI | Streamlit |
+| Evaluation | RAGAS 0.4.3 |
 
 ---
 
