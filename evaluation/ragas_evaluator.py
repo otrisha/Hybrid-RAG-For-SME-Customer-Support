@@ -71,14 +71,24 @@ def _run_ragas(questions, answers, contexts, ground_truths) -> list[dict]:
         from ragas import evaluate
         from ragas.metrics import (faithfulness, answer_relevancy,
                                     context_precision, context_recall)
-        from datasets import Dataset
+        from ragas.dataset_schema import SingleTurnSample, EvaluationDataset
         from langchain_openai import ChatOpenAI
-        dataset = Dataset.from_dict({"question": questions, "answer": answers,
-                                     "contexts": contexts, "ground_truth": ground_truths})
+
+        samples = [
+            SingleTurnSample(
+                user_input=q, response=a,
+                retrieved_contexts=ctx, reference=gt,
+            )
+            for q, a, ctx, gt in zip(questions, answers, contexts, ground_truths)
+        ]
+        dataset = EvaluationDataset(samples=samples)
+        llm = ChatOpenAI(model="gpt-4o-mini", openai_api_key=OPENAI_API_KEY)
         result = evaluate(dataset,
                           metrics=[faithfulness, answer_relevancy,
                                    context_precision, context_recall],
-                          llm=ChatOpenAI(model="gpt-4o-mini", openai_api_key=OPENAI_API_KEY))
+                          llm=llm,
+                          raise_exceptions=False,
+                          allow_nest_asyncio=False)
         return result.to_pandas().to_dict("records")
     except Exception as exc:
         log.warning(f"RAGAS skipped: {exc}")

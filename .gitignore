@@ -1,11 +1,24 @@
-# Ignore virtual environent folder
-venv/ 
+# Virtual environment
+venv/
 
-# Ignore common OS and IDE files
+# Environment variable files — never commit real keys
+.env
+.streamlit/secrets.toml
+
+# OS / IDE artefacts
 .DS_Store
 *.log
 *.pyc
 __pycache__/
+.idea/
+.vscode/
 
-# Ignore environment variable files
-.env
+# Evaluation logs (large, generated locally)
+logs/
+
+# Thesis chapter generator outputs (generated locally)
+docs/*.docx
+
+# NOTE: data/bm25_index.pkl IS committed intentionally.
+# It prevents Streamlit Cloud from re-ingesting on every cold start.
+# data/bm25_index.pkl  <-- do NOT uncomment this line
