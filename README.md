@@ -2,7 +2,6 @@
 ### BDS-RAG-001 | MSc AI & Data Science | University of Wolverhampton
 
 **Researcher:** Patricia Orji  
-**Supervisor:** [Supervisor Name]  
 **Dissertation title:** *Hybrid Retrieval-Augmented Generation (RAG) for SME Customer Support: A Case Study in Dredging Equipment Manufacturing*
 
 ---
