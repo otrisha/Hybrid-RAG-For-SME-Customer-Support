@@ -18,7 +18,7 @@ The system retrieves relevant content from a five-document knowledge base using 
 ## Live Demo
 
 > Deployed on Streamlit Community Cloud  
-> [View on](https://benamdajtechdesk.streamlit.app/)
+>[![Open App](https://img.shields.io/badge/Open-App-brightgreen)](https://benamdajtechdesk.streamlit.app/)
 
 ---
 
