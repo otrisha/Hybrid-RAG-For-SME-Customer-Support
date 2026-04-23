@@ -18,7 +18,7 @@ The system retrieves relevant content from a five-document knowledge base using 
 ## Live Demo
 
 > Deployed on Streamlit Community Cloud  
-> Main file: `streamlit_app.py`
+> [View on](https://benamdajtechdesk.streamlit.app/)
 
 ---
 
